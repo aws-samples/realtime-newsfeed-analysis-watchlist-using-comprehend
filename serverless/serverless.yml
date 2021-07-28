@@ -1,0 +1,55 @@
+service: newsfeed-realtime-analysis
+frameworkVersion: '2'
+provider:
+  name: aws
+  runtime: python3.8
+  role: ${self:custom.SECRETS.RNA-lambda-role}
+#  vpc:
+#    securityGroupIds:
+#      - sg-084aa9fc1222e211a
+#    subnetIds:
+#      - subnet-e116fe8a
+  stage: ${opt:stage, 'dev'}
+  region: us-east-2
+functions:
+  query_newsfeed:
+    handler: newsfeed.query_newsfeed
+    timeout: 30
+    environment:
+      SECRET: ${self:custom.SECRET_NAME}
+    events:
+      - http:
+          path: /query_newsfeed/
+          method: post
+  evaluate_newsfeed:
+    handler: newsfeed.evaluate_newsfeed
+    timeout: 300
+    environment:
+      SECRET: ${self:custom.SECRET_NAME}
+    events:
+      - sqs: ${self:custom.SECRETS.incoming-newsfeed-queue-arn}
+  refresh_watchlist:
+    handler: watchlist.refresh
+    timeout: 30
+    environment:
+      SECRET: ${self:custom.SECRET_NAME}
+    events:
+      - http:
+          path: /refresh_watchlist/
+          method: post
+  check_keyword:
+    handler: watchlist.check_keyword
+    timeout: 30
+    environment:
+      SECRET: ${self:custom.SECRET_NAME}
+    events:
+      - http:
+          path: /check-keyword/
+          method: post
+plugins:
+  - serverless-python-requirements
+custom:
+  SECRETS: ${ssm:/aws/reference/secretsmanager/RNASecret~true}
+  SECRET_NAME: RNASecret
+  pythonRequirements:
+    dockerizePip: true

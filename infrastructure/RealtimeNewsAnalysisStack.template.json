@@ -1,0 +1,1146 @@
+{
+  "Resources": {
+    "Queue4A7E3555": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "KmsMasterKeyId": "alias/aws/sqs",
+        "VisibilityTimeout": 300
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/Queue/Resource"
+      }
+    },
+    "NewsfeedMatchTopic52EAA42C": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Newsfeed Match subscription topic"
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedMatchTopic/Resource"
+      }
+    },
+    "NewsfeedMatchTopicTokenSubscription1028CAC6F": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "NewsfeedMatchTopic52EAA42C"
+        },
+        "Endpoint": {
+          "Ref": "notificationemailparam"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedMatchTopic/TokenSubscription:1/Resource"
+      }
+    },
+    "NewsfeedMatchTopiczshabatamazoncom857A01D9": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "NewsfeedMatchTopic52EAA42C"
+        },
+        "Endpoint": "zshabat@amazon.com"
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedMatchTopic/zshabat@amazon.com/Resource"
+      }
+    },
+    "lambdaRoleC844FDB1": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "sns.amazonaws.com",
+                  "lambda.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/SecretsManagerReadWrite"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSQSFullAccess"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonS3FullAccess"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSNSFullAccess"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/ComprehendFullAccess"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonRDSDataFullAccess"
+              ]
+            ]
+          },
+          "arn:aws:iam::aws:policy/service-role/AmazonSNSRole"
+        ],
+        "RoleName": "RNAlambdaRole"
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/lambdaRole/Resource"
+      }
+    },
+    "lambdaRoleDefaultPolicyA63A8A92": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:GenerateDataKey",
+                "kms:ReEncryptFrom",
+                "kms:ReEncryptTo",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "lambdaRoleDefaultPolicyA63A8A92",
+        "Roles": [
+          {
+            "Ref": "lambdaRoleC844FDB1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/lambdaRole/DefaultPolicy/Resource"
+      }
+    },
+    "NewsfeedBucketKeyF67A6E37": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::115272120974:root"
+                    ]
+                  ]
+                }
+              },
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "Created by RealtimeNewsAnalysisStack/NewsfeedBucket"
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedBucket/Key/Resource"
+      }
+    },
+    "NewsfeedBucket275E202E": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "NewsfeedBucketKeyF67A6E37",
+                    "Arn"
+                  ]
+                },
+                "SSEAlgorithm": "aws:kms"
+              }
+            }
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedBucket/Resource"
+      }
+    },
+    "NewsfeedBucketPolicy9252BC3B": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "NewsfeedBucket275E202E"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "lambdaRoleC844FDB1",
+                    "Arn"
+                  ]
+                }
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "NewsfeedBucket275E202E",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/NewsfeedBucket/Policy/Resource"
+      }
+    },
+    "AuroraDBVPCD2F5F4E9": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/Resource"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1SubnetA379140C": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2a",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/Subnet"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1RouteTableF5ED5AB2": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/RouteTable"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1RouteTableAssociation22ABDCFB": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet1RouteTableF5ED5AB2"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet1SubnetA379140C"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1DefaultRoute211428F3": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet1RouteTableF5ED5AB2"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "AuroraDBVPCIGW3B0B172F"
+        }
+      },
+      "DependsOn": [
+        "AuroraDBVPCVPCGW6891F7C1"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1EIP515004FB": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/EIP"
+      }
+    },
+    "AuroraDBVPCPublicSubnet1NATGateway1ACA650C": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "AuroraDBVPCPublicSubnet1EIP515004FB",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet1SubnetA379140C"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet1/NATGateway"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2Subnet97A2DBE0": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.32.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2b",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/Subnet"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2RouteTableFAC47810": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/RouteTable"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2RouteTableAssociation9C520FE8": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet2RouteTableFAC47810"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet2Subnet97A2DBE0"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2DefaultRouteC828A013": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet2RouteTableFAC47810"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "AuroraDBVPCIGW3B0B172F"
+        }
+      },
+      "DependsOn": [
+        "AuroraDBVPCVPCGW6891F7C1"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2EIPB00A08FA": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/EIP"
+      }
+    },
+    "AuroraDBVPCPublicSubnet2NATGateway81D6F348": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "AuroraDBVPCPublicSubnet2EIPB00A08FA",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet2Subnet97A2DBE0"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet2/NATGateway"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3SubnetFF843D50": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.64.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2c",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/Subnet"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3RouteTableD174EC1E": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/RouteTable"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3RouteTableAssociationB0D90BA9": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet3RouteTableD174EC1E"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet3SubnetFF843D50"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3DefaultRoute0E190D5B": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPublicSubnet3RouteTableD174EC1E"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "AuroraDBVPCIGW3B0B172F"
+        }
+      },
+      "DependsOn": [
+        "AuroraDBVPCVPCGW6891F7C1"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3EIPD5A6A782": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/EIP"
+      }
+    },
+    "AuroraDBVPCPublicSubnet3NATGateway8B8355ED": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "AuroraDBVPCPublicSubnet3EIPD5A6A782",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPublicSubnet3SubnetFF843D50"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PublicSubnet3/NATGateway"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet1SubnetCF5CE444": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.96.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2a",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1/Subnet"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet1RouteTable7465B483": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1/RouteTable"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet1RouteTableAssociationCBE31AC0": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet1RouteTable7465B483"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPrivateSubnet1SubnetCF5CE444"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet1DefaultRouteD3A42012": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet1RouteTable7465B483"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "AuroraDBVPCPublicSubnet1NATGateway1ACA650C"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet1/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet2Subnet4C439B8F": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.128.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2b",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2/Subnet"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet2RouteTable5349CB13": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2/RouteTable"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet2RouteTableAssociationDC01F523": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet2RouteTable5349CB13"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPrivateSubnet2Subnet4C439B8F"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet2DefaultRoute5114B09A": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet2RouteTable5349CB13"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "AuroraDBVPCPublicSubnet2NATGateway81D6F348"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet2/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet3SubnetC5C671B6": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.160.0/19",
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "AvailabilityZone": "us-east-2c",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3/Subnet"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet3RouteTable1A227B82": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3/RouteTable"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet3RouteTableAssociation511319CC": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet3RouteTable1A227B82"
+        },
+        "SubnetId": {
+          "Ref": "AuroraDBVPCPrivateSubnet3SubnetC5C671B6"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3/RouteTableAssociation"
+      }
+    },
+    "AuroraDBVPCPrivateSubnet3DefaultRoute868BB291": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AuroraDBVPCPrivateSubnet3RouteTable1A227B82"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "AuroraDBVPCPublicSubnet3NATGateway8B8355ED"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/PrivateSubnet3/DefaultRoute"
+      }
+    },
+    "AuroraDBVPCIGW3B0B172F": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RealtimeNewsAnalysisStack/AuroraDBVPC"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/IGW"
+      }
+    },
+    "AuroraDBVPCVPCGW6891F7C1": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        },
+        "InternetGatewayId": {
+          "Ref": "AuroraDBVPCIGW3B0B172F"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/AuroraDBVPC/VPCGW"
+      }
+    },
+    "aurorapostgresclusterSubnets36844680": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Subnets for aurora-postgres-cluster database",
+        "SubnetIds": [
+          {
+            "Ref": "AuroraDBVPCPrivateSubnet1SubnetCF5CE444"
+          },
+          {
+            "Ref": "AuroraDBVPCPrivateSubnet2Subnet4C439B8F"
+          },
+          {
+            "Ref": "AuroraDBVPCPrivateSubnet3SubnetC5C671B6"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/aurora-postgres-cluster/Subnets/Default"
+      }
+    },
+    "aurorapostgresclusterSecret61F9BB46": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Generated by the CDK for stack: ",
+              {
+                "Ref": "AWS::StackName"
+              }
+            ]
+          ]
+        },
+        "GenerateSecretString": {
+          "ExcludeCharacters": " %+~`#$&*()|[]{}:;<>?!'/@\"\\",
+          "GenerateStringKey": "password",
+          "PasswordLength": 30,
+          "SecretStringTemplate": "{\"username\":\"postgres\"}"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/aurora-postgres-cluster/Secret/Resource"
+      }
+    },
+    "aurorapostgresclusterSecretAttachment6C86A34B": {
+      "Type": "AWS::SecretsManager::SecretTargetAttachment",
+      "Properties": {
+        "SecretId": {
+          "Ref": "aurorapostgresclusterSecret61F9BB46"
+        },
+        "TargetId": {
+          "Ref": "aurorapostgrescluster780093AE"
+        },
+        "TargetType": "AWS::RDS::DBCluster"
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/aurora-postgres-cluster/Secret/Attachment/Resource"
+      }
+    },
+    "aurorapostgresclusterSecurityGroup6DBC4B6A": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "RDS security group",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "AuroraDBVPCD2F5F4E9"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/aurora-postgres-cluster/SecurityGroup/Resource"
+      }
+    },
+    "aurorapostgrescluster780093AE": {
+      "Type": "AWS::RDS::DBCluster",
+      "Properties": {
+        "Engine": "aurora-postgresql",
+        "DBClusterParameterGroupName": "default.aurora-postgresql10",
+        "DBSubnetGroupName": {
+          "Ref": "aurorapostgresclusterSubnets36844680"
+        },
+        "EnableHttpEndpoint": true,
+        "EngineMode": "serverless",
+        "MasterUsername": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "aurorapostgresclusterSecret61F9BB46"
+              },
+              ":SecretString:username::}}"
+            ]
+          ]
+        },
+        "MasterUserPassword": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "aurorapostgresclusterSecret61F9BB46"
+              },
+              ":SecretString:password::}}"
+            ]
+          ]
+        },
+        "ScalingConfiguration": {
+          "AutoPause": true,
+          "MaxCapacity": 32,
+          "MinCapacity": 8,
+          "SecondsUntilAutoPause": 600
+        },
+        "StorageEncrypted": true,
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "aurorapostgresclusterSecurityGroup6DBC4B6A",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Snapshot",
+      "DeletionPolicy": "Snapshot",
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/aurora-postgres-cluster/Resource"
+      }
+    },
+    "RNASecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "SecretString": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"RNA-lambda-role\":\"",
+              {
+                "Fn::GetAtt": [
+                  "lambdaRoleC844FDB1",
+                  "Arn"
+                ]
+              },
+              "\",\"newsfeed-bucket\":\"",
+              {
+                "Ref": "NewsfeedBucket275E202E"
+              },
+              "\",\"incoming-newsfeed-queue\":\"",
+              {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "QueueName"
+                ]
+              },
+              "\",\"incoming-newsfeed-queue-arn\":\"",
+              {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn"
+                ]
+              },
+              "\",\"sns-notification-topic\":\"",
+              {
+                "Ref": "NewsfeedMatchTopic52EAA42C"
+              },
+              "\",\"db-cluster-arn\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":rds:us-east-2:115272120974:cluster:",
+              {
+                "Ref": "aurorapostgrescluster780093AE"
+              },
+              "\",\"db-secret\":\"",
+              {
+                "Ref": "aurorapostgresclusterSecretAttachment6C86A34B"
+              },
+              "\"}"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/RNASecret"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE11Sy27CMBD8Fu6ugdIeeiuECqFKbZog7o7ZUpPETv0AIcv/Xj8CiXqa2ZnNerzxHL88YTubvJKLeqCHemqpkIBtqQmtUfbNcyJJCxokKkAJIymgTHClpaE6+J9Gdyaym+9QmGXVr8L2y4CBYEbikOJe3ImO0SAmUppKUck6zQQP6rh2iJEW20I0cUrEXDSMXmO2yPzUBbYrQ2uIOXqWYGge1w7VrQ/yDtHx4BDQR2z3Xcy1zzOUm8p3+iw8TR1YIYyGHalSpKQP2lIpQRm5XSYagbxt8wAfRG+Ihgu5olyys6fD4C33a/b81pCS9NVS+z/y0wLXqARqJNPXjRSmixnGgl8HUAlatYSTI0hsU4eXUIIdkUfQo4H3hv+Ocw7Nh7cRUB784kqQZ5ANKJU1RoXHkW5xT7RejYU10aQiCvoU0e8/9AdwcQB8UtPz/Bkv8GxyUow9SMM1awEXCf8AadXMi6cCAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "RealtimeNewsAnalysisStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Parameters": {
+    "notificationemailparam": {
+      "Type": "String"
+    }
+  },
+  "Outputs": {
+    "SecretName": {
+      "Value": {
+        "Ref": "RNASecret"
+      }
+    },
+    "LambdaRole": {
+      "Value": {
+        "Fn::GetAtt": [
+          "lambdaRoleC844FDB1",
+          "Arn"
+        ]
+      }
+    },
+    "newsfeedbucket": {
+      "Value": {
+        "Fn::GetAtt": [
+          "NewsfeedBucket275E202E",
+          "Arn"
+        ]
+      }
+    },
+    "incomingnewsfeedqueue": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Queue4A7E3555",
+          "Arn"
+        ]
+      }
+    },
+    "snsnotificationtopic": {
+      "Value": {
+        "Ref": "NewsfeedMatchTopic52EAA42C"
+      }
+    }
+  }
+}

@@ -1,0 +1,604 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "QueryUnderscorenewsfeedLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/newsfeed-realtime-analysis-dev-query_newsfeed"
+      }
+    },
+    "EvaluateUnderscorenewsfeedLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/newsfeed-realtime-analysis-dev-evaluate_newsfeed"
+      }
+    },
+    "RefreshUnderscorewatchlistLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/newsfeed-realtime-analysis-dev-refresh_watchlist"
+      }
+    },
+    "CheckUnderscorekeywordLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/newsfeed-realtime-analysis-dev-check_keyword"
+      }
+    },
+    "QueryUnderscorenewsfeedLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/newsfeed-realtime-analysis/dev/1626720115194-2021-07-19T18:41:55.194Z/newsfeed-realtime-analysis.zip"
+        },
+        "FunctionName": "newsfeed-realtime-analysis-dev-query_newsfeed",
+        "Handler": "newsfeed.query_newsfeed",
+        "MemorySize": 1024,
+        "Role": "arn:aws:iam::115272120974:role/RealtimeNewsAnalysisStack-lambdaRoleC844FDB1-1IVK4U039FYHK",
+        "Runtime": "python3.8",
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "SECRET": "RNASecret"
+          }
+        }
+      },
+      "DependsOn": [
+        "QueryUnderscorenewsfeedLogGroup"
+      ]
+    },
+    "QueryUnderscorenewsfeedLambdaVersionTD27taqJBZvjwmyXMsBGLb7RBrd0mdY5fSXwVllI": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "QueryUnderscorenewsfeedLambdaFunction"
+        },
+        "CodeSha256": "PjUeB+rOF16crd1062lfVLC7ryYn6Gu6GSvY4dhJxCU="
+      }
+    },
+    "EvaluateUnderscorenewsfeedLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/newsfeed-realtime-analysis/dev/1626720115194-2021-07-19T18:41:55.194Z/newsfeed-realtime-analysis.zip"
+        },
+        "FunctionName": "newsfeed-realtime-analysis-dev-evaluate_newsfeed",
+        "Handler": "newsfeed.evaluate_newsfeed",
+        "MemorySize": 1024,
+        "Role": "arn:aws:iam::115272120974:role/RealtimeNewsAnalysisStack-lambdaRoleC844FDB1-1IVK4U039FYHK",
+        "Runtime": "python3.8",
+        "Timeout": 300,
+        "Environment": {
+          "Variables": {
+            "SECRET": "RNASecret"
+          }
+        }
+      },
+      "DependsOn": [
+        "EvaluateUnderscorenewsfeedLogGroup"
+      ]
+    },
+    "EvaluateUnderscorenewsfeedLambdaVersioniB428TdUsYqGJZVAu3K4dXqbbbycJ1yLdQAvStBEJU": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "EvaluateUnderscorenewsfeedLambdaFunction"
+        },
+        "CodeSha256": "PjUeB+rOF16crd1062lfVLC7ryYn6Gu6GSvY4dhJxCU="
+      }
+    },
+    "RefreshUnderscorewatchlistLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/newsfeed-realtime-analysis/dev/1626720115194-2021-07-19T18:41:55.194Z/newsfeed-realtime-analysis.zip"
+        },
+        "FunctionName": "newsfeed-realtime-analysis-dev-refresh_watchlist",
+        "Handler": "watchlist.refresh",
+        "MemorySize": 1024,
+        "Role": "arn:aws:iam::115272120974:role/RealtimeNewsAnalysisStack-lambdaRoleC844FDB1-1IVK4U039FYHK",
+        "Runtime": "python3.8",
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "SECRET": "RNASecret"
+          }
+        }
+      },
+      "DependsOn": [
+        "RefreshUnderscorewatchlistLogGroup"
+      ]
+    },
+    "RefreshUnderscorewatchlistLambdaVersionfG43NAyCT0wpmdyVkYfM37uv5Bxsv8LrA3P4krNMI": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "RefreshUnderscorewatchlistLambdaFunction"
+        },
+        "CodeSha256": "PjUeB+rOF16crd1062lfVLC7ryYn6Gu6GSvY4dhJxCU="
+      }
+    },
+    "CheckUnderscorekeywordLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/newsfeed-realtime-analysis/dev/1626720115194-2021-07-19T18:41:55.194Z/newsfeed-realtime-analysis.zip"
+        },
+        "FunctionName": "newsfeed-realtime-analysis-dev-check_keyword",
+        "Handler": "watchlist.check_keyword",
+        "MemorySize": 1024,
+        "Role": "arn:aws:iam::115272120974:role/RealtimeNewsAnalysisStack-lambdaRoleC844FDB1-1IVK4U039FYHK",
+        "Runtime": "python3.8",
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "SECRET": "RNASecret"
+          }
+        }
+      },
+      "DependsOn": [
+        "CheckUnderscorekeywordLogGroup"
+      ]
+    },
+    "CheckUnderscorekeywordLambdaVersionlE5wDu3razRAGiVzH2JbBLO7m3yhnzA4xEAqGEOBY": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CheckUnderscorekeywordLambdaFunction"
+        },
+        "CodeSha256": "PjUeB+rOF16crd1062lfVLC7ryYn6Gu6GSvY4dhJxCU="
+      }
+    },
+    "ApiGatewayRestApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "dev-newsfeed-realtime-analysis",
+        "EndpointConfiguration": {
+          "Types": [
+            "EDGE"
+          ]
+        },
+        "Policy": ""
+      }
+    },
+    "ApiGatewayResourceQuerynewsfeed": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "query_newsfeed",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceRefreshwatchlist": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "refresh_watchlist",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceCheckDashkeyword": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "check-keyword",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayMethodQuerynewsfeedPost": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceQuerynewsfeed"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "QueryUnderscorenewsfeedLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      }
+    },
+    "ApiGatewayMethodRefreshwatchlistPost": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceRefreshwatchlist"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "RefreshUnderscorewatchlistLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      }
+    },
+    "ApiGatewayMethodCheckDashkeywordPost": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceCheckDashkeyword"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "CheckUnderscorekeywordLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      }
+    },
+    "ApiGatewayDeployment1626720077432": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "StageName": "dev"
+      },
+      "DependsOn": [
+        "ApiGatewayMethodQuerynewsfeedPost",
+        "ApiGatewayMethodRefreshwatchlistPost",
+        "ApiGatewayMethodCheckDashkeywordPost"
+      ]
+    },
+    "QueryUnderscorenewsfeedLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "QueryUnderscorenewsfeedLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "RefreshUnderscorewatchlistLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "RefreshUnderscorewatchlistLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "CheckUnderscorekeywordLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CheckUnderscorekeywordLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "EvaluateUnderscorenewsfeedEventSourceMappingSQSRealtimeNewsAnalysisStackQueue4A7E3555I012B4UOIRDE": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [],
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": "arn:aws:sqs:us-east-2:115272120974:RealtimeNewsAnalysisStack-Queue4A7E3555-I012B4UOIRDE",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "EvaluateUnderscorenewsfeedLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      }
+    },
+    "QueryUnderscorenewsfeedLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "QueryUnderscorenewsfeedLambdaVersionTD27taqJBZvjwmyXMsBGLb7RBrd0mdY5fSXwVllI"
+      }
+    },
+    "EvaluateUnderscorenewsfeedLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "EvaluateUnderscorenewsfeedLambdaVersioniB428TdUsYqGJZVAu3K4dXqbbbycJ1yLdQAvStBEJU"
+      }
+    },
+    "RefreshUnderscorewatchlistLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "RefreshUnderscorewatchlistLambdaVersionfG43NAyCT0wpmdyVkYfM37uv5Bxsv8LrA3P4krNMI"
+      }
+    },
+    "CheckUnderscorekeywordLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CheckUnderscorekeywordLambdaVersionlE5wDu3razRAGiVzH2JbBLO7m3yhnzA4xEAqGEOBY"
+      }
+    },
+    "ServiceEndpoint": {
+      "Description": "URL of the service endpoint",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "ApiGatewayRestApi"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/dev"
+          ]
+        ]
+      }
+    }
+  }
+}
